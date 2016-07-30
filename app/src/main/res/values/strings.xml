@@ -9,5 +9,8 @@
   <string name="content_test">Search for a Stock Symbol</string>
   <string name="input_hint">FB</string>
   <string name="input_prefill"></string>
+
+  <!-- Error Strings-->
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+  <string name="stock_added_toast">This stock is already saved!</string>
 </resources>
