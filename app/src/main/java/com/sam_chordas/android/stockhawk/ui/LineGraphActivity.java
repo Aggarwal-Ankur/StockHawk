@@ -63,7 +63,7 @@ public class LineGraphActivity extends AppCompatActivity {
         //Build the dialog
         mDialog = new ProgressDialog(this);
         mDialog.setIndeterminate(true);
-        mDialog.setMessage("Fetching Data...");
+        mDialog.setMessage(getResources().getString(R.string.fetching_data));
 
 
         StringBuilder urlStringBuilder = new StringBuilder();
@@ -152,7 +152,7 @@ public class LineGraphActivity extends AppCompatActivity {
             }
 
             if(stockDataList == null || stockDataList.size()< 1){
-                Toast.makeText(LineGraphActivity.this, "Error fetching data" /*getResources().getString(R.string.error_no_trailers)*/, Toast.LENGTH_SHORT).show();
+                Toast.makeText(LineGraphActivity.this, getResources().getString(R.string.fetch_error), Toast.LENGTH_SHORT).show();
             }else{
                 ArrayList<Entry> entries = new ArrayList<>();
 
@@ -176,7 +176,7 @@ public class LineGraphActivity extends AppCompatActivity {
                     entries.add(new Entry(closingValue, entryCount++));
                 }
 
-                LineDataSet dataset = new LineDataSet(entries, "Closing Value");
+                LineDataSet dataset = new LineDataSet(entries, getResources().getString(R.string.line_graph_x_axis_string));
                 LineData data = new LineData(labels, dataset);
 
                 //dataset.setColors(ColorTemplate.COLORFUL_COLORS);
@@ -185,6 +185,7 @@ public class LineGraphActivity extends AppCompatActivity {
 
                 mLineChart.setData(data);
                 mLineChart.setBackgroundColor(ColorTemplate.COLOR_NONE);
+                mLineChart.setDescription(getResources().getString(R.string.empty));
             }
         }
     }
