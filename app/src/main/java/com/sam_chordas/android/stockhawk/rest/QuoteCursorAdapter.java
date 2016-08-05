@@ -1,6 +1,7 @@
 package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -16,6 +17,8 @@ import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperAdapter;
 import com.sam_chordas.android.stockhawk.touch_helper.ItemTouchHelperViewHolder;
+import com.sam_chordas.android.stockhawk.ui.LineGraphActivity;
+import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
 /**
  * Created by sam_chordas on 10/6/15.
@@ -45,7 +48,10 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
   @Override
   public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor){
-    viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex("symbol")));
+    String symbolText = cursor.getString(cursor.getColumnIndex("symbol"));
+    viewHolder.symbol.setText(symbolText);
+    viewHolder.itemView.setTag(symbolText);
+
     viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex("bid_price")));
     int sdk = Build.VERSION.SDK_INT;
     if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1){
@@ -86,11 +92,13 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
   public static class ViewHolder extends RecyclerView.ViewHolder
       implements ItemTouchHelperViewHolder, View.OnClickListener{
+    public View itemView;
     public final TextView symbol;
     public final TextView bidPrice;
     public final TextView change;
     public ViewHolder(View itemView){
       super(itemView);
+      this.itemView = itemView;
       symbol = (TextView) itemView.findViewById(R.id.stock_symbol);
       symbol.setTypeface(robotoLight);
       bidPrice = (TextView) itemView.findViewById(R.id.bid_price);
