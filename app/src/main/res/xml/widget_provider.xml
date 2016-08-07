@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.sam_chordas.android.stockhawk.widget.WidgetConfigActivity"
+    android:initialLayout="@layout/single_stock_widget_layout"
+    android:minHeight="40dp"
+    android:minWidth="180dp"
+    android:updatePeriodMillis="18000000" >
+
+</appwidget-provider>
