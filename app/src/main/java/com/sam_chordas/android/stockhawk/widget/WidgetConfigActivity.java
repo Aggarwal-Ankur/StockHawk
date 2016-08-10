@@ -69,7 +69,7 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(mContext, "You chose " + mSymbolList[i], Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, getResources().getString(R.string.stock_choice) + mSymbolList[i], Toast.LENGTH_LONG).show();
         saveSymbolPref(mContext, mAppWidgetId, mSymbolList[i].toString());
         startWidget();
     }

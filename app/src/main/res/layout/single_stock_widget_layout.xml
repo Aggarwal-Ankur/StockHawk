@@ -22,7 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="start|center_vertical"
-            tools:text="GOOG" />
+            tools:text="GOOG"
+            android:contentDescription="@string/symbol_description"/>
 
         <TextView
             android:id="@+id/price"
@@ -33,7 +34,8 @@
             android:gravity="end"
             android:paddingEnd="10sp"
             android:paddingRight="10sp"
-            tools:text="1000.00" />
+            tools:text="1000.00"
+            android:contentDescription="@string/price_description"/>
 
     </LinearLayout>
 </FrameLayout>
