@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -35,6 +37,10 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget_config);
+
+        //Set it as a fallback. Actual success is set later
+        setResult(Activity.RESULT_CANCELED);
+
         mContext = this;
 
         setTitle(getResources().getString(R.string.config_activity_title));
@@ -63,6 +69,7 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Toast.makeText(mContext, "You chose " + mSymbolList[i], Toast.LENGTH_LONG).show();
+        saveSymbolPref(mContext, mAppWidgetId, mSymbolList[i].toString());
         startWidget();
     }
 
@@ -78,6 +85,13 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
         // finish this activity
         this.finish();
 
+    }
+
+    // Write the prefix to the SharedPreferences object for this widget
+    private void saveSymbolPref(Context context, int appWidgetId, String text) {
+        SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        prefs.putString(Integer.toString(appWidgetId), text);
+        prefs.commit();
     }
 
     /**
