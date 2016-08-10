@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.service.StockIntentService;
 
 import java.io.IOException;
 
@@ -74,10 +75,6 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
     }
 
     private void startWidget() {
-
-        // this intent is essential to show the widget
-        // if this intent is not included,you can't show
-        // widget on homescreen
         Intent intent = new Intent();
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(Activity.RESULT_OK, intent);
@@ -85,12 +82,17 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
         // finish this activity
         this.finish();
 
+        Intent serviceIntent = new Intent(mContext, StockIntentService.class);
+        serviceIntent.putExtra("tag", "periodic");
+        startService(serviceIntent);
     }
 
     // Write the prefix to the SharedPreferences object for this widget
     private void saveSymbolPref(Context context, int appWidgetId, String text) {
+        String key = StockWidgetProvider.SYMBOL_KEY_PREFIX
+                + StockWidgetProvider.SYMBOL_KEY_SEPARATOR + Integer.toString(appWidgetId);
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.putString(Integer.toString(appWidgetId), text);
+        prefs.putString(key, text);
         prefs.commit();
     }
 
@@ -120,6 +122,7 @@ public class WidgetConfigActivity extends AppCompatActivity implements AdapterVi
                         initQueryCursor.moveToNext();
                     }
 
+                    initQueryCursor.close();
                 }
                 return null;
             } catch (Exception e) {

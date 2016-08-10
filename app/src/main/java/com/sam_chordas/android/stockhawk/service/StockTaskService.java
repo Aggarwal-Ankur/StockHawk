@@ -1,19 +1,29 @@
 package com.sam_chordas.android.stockhawk.service;
 
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
+import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
+import com.sam_chordas.android.stockhawk.widget.StockWidgetProvider;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -21,6 +31,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 
 /**
  * Created by sam_chordas on 9/30/15.
@@ -129,6 +140,10 @@ public class StockTaskService extends GcmTaskService {
                     }
                     mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                             Utils.quoteJsonToContentVals(getResponse));
+
+                    if(isUpdate) {
+                        updateWidgets();
+                    }
                 } catch (RemoteException | OperationApplicationException e) {
                     Log.e(LOG_TAG, "Error applying batch insert", e);
                 }
@@ -141,6 +156,95 @@ public class StockTaskService extends GcmTaskService {
         }
 
         return result;
+    }
+
+
+    private void updateWidgets(){
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(mContext,
+                StockWidgetProvider.class));
+
+
+        HashMap<String, Double> stockPriceMap = new HashMap<>();
+
+        //Get the data from the DB and update the widgets
+        try {
+            Cursor initQueryCursor = mContext.getContentResolver().query(
+                    QuoteProvider.Quotes.CONTENT_URI,
+                    new String[]{"Distinct " + QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE, QuoteColumns.ISCURRENT},
+                    null, null, null);
+
+            if (initQueryCursor != null) {
+                initQueryCursor.moveToFirst();
+
+                int columnIndexSymbol = initQueryCursor.getColumnIndex(QuoteColumns.SYMBOL);
+                int columnIndexPrice = initQueryCursor.getColumnIndex(QuoteColumns.BIDPRICE);
+                int columnIndexIsCurrent = initQueryCursor.getColumnIndex(QuoteColumns.ISCURRENT);
+                int elementCount = initQueryCursor.getCount();
+
+                for (int i = 0; i < elementCount; i++) {
+                    String currentSymbol = initQueryCursor.getString(columnIndexSymbol);
+                    String currentPrice = initQueryCursor.getString(columnIndexPrice);
+
+                    boolean isCurrent = initQueryCursor.getInt(columnIndexIsCurrent) == 1 ? true : false;
+
+                    if(!isCurrent){
+                        initQueryCursor.moveToNext();
+                        continue;
+                    }
+
+                    double currentPriceValue = Double.parseDouble(currentPrice);
+
+                    stockPriceMap.put(currentSymbol, currentPriceValue);
+                    initQueryCursor.moveToNext();
+                }
+
+                initQueryCursor.close();
+
+            }
+
+            if(!stockPriceMap.isEmpty()){
+                for(int currentAppWidgetId : appWidgetIds){
+                    String key = StockWidgetProvider.SYMBOL_KEY_PREFIX
+                            + StockWidgetProvider.SYMBOL_KEY_SEPARATOR + Integer.toString(currentAppWidgetId);
+
+                    String widgetSymbol = loadSymbolPref(mContext, key);
+
+                    if(widgetSymbol == null || widgetSymbol.trim().isEmpty()){
+                        continue;
+                    }
+
+                    //Else check if the symbol is in hashmap
+
+                    if(stockPriceMap.containsKey(widgetSymbol)){
+                        double stockPrice = stockPriceMap.get(widgetSymbol);
+
+                        //Update in the widget
+                        int layoutId = R.layout.single_stock_widget_layout;
+                        RemoteViews views = new RemoteViews(mContext.getPackageName(), layoutId);
+
+                        views.setTextViewText(R.id.stock_symbol, widgetSymbol);
+                        views.setTextViewText(R.id.price, Double.toString(stockPrice));
+
+                        // Create an Intent to launch MainActivity
+                        Intent launchIntent = new Intent(mContext, MyStocksActivity.class);
+                        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, launchIntent, 0);
+                        views.setOnClickPendingIntent(R.id.widget, pendingIntent);
+
+                        // Tell the AppWidgetManager to perform an update on the current app widget
+                        appWidgetManager.updateAppWidget(currentAppWidgetId, views);
+
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String loadSymbolPref(Context context, String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(key, null);
     }
 
 }

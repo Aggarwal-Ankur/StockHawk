@@ -7,10 +7,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.widget.RemoteViews;
 
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
 /**
@@ -19,26 +22,31 @@ import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
 public class StockWidgetProvider extends AppWidgetProvider {
 
+    public static final String SYMBOL_KEY_PREFIX = "id";
+    public static final String SYMBOL_KEY_SEPARATOR = "_";
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
-
-        // Get all ids
-        ComponentName currentWidget = new ComponentName(context, StockWidgetProvider.class);
-
-        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(currentWidget);
-
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.single_stock_widget_layout);
-
-        // Create an Intent to launch MainActivity
-        Intent intent = new Intent(context, MyStocksActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        views.setOnClickPendingIntent(R.id.widget, pendingIntent);
-
+        Intent serviceIntent = new Intent(context, StockIntentService.class);
+        serviceIntent.putExtra("tag", "widget");
+        context.startService(serviceIntent);
     }
 
-    private String loadSymbolPref(Context context, int appWidgetId){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(Integer.toString(appWidgetId), null);
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
+                                          int appWidgetId, Bundle newOptions) {
+        Intent serviceIntent = new Intent(context, StockIntentService.class);
+        serviceIntent.putExtra("tag", "widget");
+        context.startService(serviceIntent);
     }
+
+    @Override
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+        super.onReceive(context, intent);
+        Intent serviceIntent = new Intent(context, StockIntentService.class);
+        serviceIntent.putExtra("tag", "widget");
+        context.startService(serviceIntent);
+    }
+
+
 }
