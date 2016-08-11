@@ -47,6 +47,9 @@ public class LineGraphActivity extends AppCompatActivity {
 
     private HistoricalQuotesFetchTask mHistoricalQuotesFetchTask;
 
+    private long MILLIS_IN_A_DAY = 1000* 60 * 60 * 24;
+    private long NO_OF_DAYS = 7;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,8 +81,8 @@ public class LineGraphActivity extends AppCompatActivity {
 
             long todayInMillis = today.getTime();
 
-            //Start date is date 10 days back
-            long offset = 1000* 60 * 60 * 24 * 10;
+            //Start date is date 7 days back. Can be changed later
+            long offset = NO_OF_DAYS * MILLIS_IN_A_DAY;
             Date startDate = new Date();
             startDate.setTime(todayInMillis - offset);
 
@@ -163,9 +166,10 @@ public class LineGraphActivity extends AppCompatActivity {
                 int entryCount = 0;
 
                 //WE want the oldest date first
-                for(int count =size -1; count> 0; count--){
+                for(int count =size -1; count>= 0; count--){
                     HistoricalData.HistoricalStockDataItem currentItem = stockDataList.get(count);
 
+                    //This is done to remove the year from the label
                     String dateString = currentItem.getDate();
                     String dateLabel = dateString.substring(5);
 

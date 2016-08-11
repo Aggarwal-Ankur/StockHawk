@@ -10,6 +10,8 @@ import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -21,6 +23,7 @@ import com.google.android.gms.gcm.TaskParams;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.data.WidgetDataPojo;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 import com.sam_chordas.android.stockhawk.widget.StockWidgetProvider;
@@ -165,13 +168,15 @@ public class StockTaskService extends GcmTaskService {
                 StockWidgetProvider.class));
 
 
-        HashMap<String, Double> stockPriceMap = new HashMap<>();
+        HashMap<String, WidgetDataPojo> stockPriceMap = new HashMap<>();
 
         //Get the data from the DB and update the widgets
         try {
             Cursor initQueryCursor = mContext.getContentResolver().query(
                     QuoteProvider.Quotes.CONTENT_URI,
-                    new String[]{"Distinct " + QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE, QuoteColumns.ISCURRENT},
+                    new String[]{"Distinct " + QuoteColumns.SYMBOL,
+                            QuoteColumns.BIDPRICE, QuoteColumns.ISCURRENT,
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.ISUP},
                     null, null, null);
 
             if (initQueryCursor != null) {
@@ -180,12 +185,13 @@ public class StockTaskService extends GcmTaskService {
                 int columnIndexSymbol = initQueryCursor.getColumnIndex(QuoteColumns.SYMBOL);
                 int columnIndexPrice = initQueryCursor.getColumnIndex(QuoteColumns.BIDPRICE);
                 int columnIndexIsCurrent = initQueryCursor.getColumnIndex(QuoteColumns.ISCURRENT);
+                int columnIndexPercentChange = initQueryCursor.getColumnIndex(QuoteColumns.PERCENT_CHANGE);
+                int columnIndexIsUp = initQueryCursor.getColumnIndex(QuoteColumns.ISUP);
+
+
                 int elementCount = initQueryCursor.getCount();
 
                 for (int i = 0; i < elementCount; i++) {
-                    String currentSymbol = initQueryCursor.getString(columnIndexSymbol);
-                    String currentPrice = initQueryCursor.getString(columnIndexPrice);
-
                     boolean isCurrent = initQueryCursor.getInt(columnIndexIsCurrent) == 1 ? true : false;
 
                     if(!isCurrent){
@@ -193,9 +199,14 @@ public class StockTaskService extends GcmTaskService {
                         continue;
                     }
 
-                    double currentPriceValue = Double.parseDouble(currentPrice);
+                    String currentSymbol = initQueryCursor.getString(columnIndexSymbol);
+                    String currentPrice = initQueryCursor.getString(columnIndexPrice);
+                    String percentChange = initQueryCursor.getString(columnIndexPercentChange);
+                    boolean isUp = (initQueryCursor.getInt(columnIndexIsUp) == 1) ? true : false;
 
-                    stockPriceMap.put(currentSymbol, currentPriceValue);
+                    WidgetDataPojo currentData = new WidgetDataPojo(currentPrice, percentChange, isUp);
+
+                    stockPriceMap.put(currentSymbol, currentData);
                     initQueryCursor.moveToNext();
                 }
 
@@ -204,6 +215,10 @@ public class StockTaskService extends GcmTaskService {
             }
 
             if(!stockPriceMap.isEmpty()){
+                //Common drawables first
+                int upColor = R.color.material_green_700;
+                int downColor = R.color.material_red_700;
+
                 for(int currentAppWidgetId : appWidgetIds){
                     String key = StockWidgetProvider.SYMBOL_KEY_PREFIX
                             + StockWidgetProvider.SYMBOL_KEY_SEPARATOR + Integer.toString(currentAppWidgetId);
@@ -217,14 +232,25 @@ public class StockTaskService extends GcmTaskService {
                     //Else check if the symbol is in hashmap
 
                     if(stockPriceMap.containsKey(widgetSymbol)){
-                        double stockPrice = stockPriceMap.get(widgetSymbol);
+                        WidgetDataPojo currentData = stockPriceMap.get(widgetSymbol);
 
                         //Update in the widget
                         int layoutId = R.layout.single_stock_widget_layout;
                         RemoteViews views = new RemoteViews(mContext.getPackageName(), layoutId);
 
                         views.setTextViewText(R.id.stock_symbol, widgetSymbol);
-                        views.setTextViewText(R.id.price, Double.toString(stockPrice));
+                        views.setTextViewText(R.id.bid_price, currentData.getPrice());
+
+
+                        int sdk = Build.VERSION.SDK_INT;
+                        if (currentData.isUp()){
+                            views.setInt(R.id.change, "setBackgroundResource", upColor);
+                        } else{
+                            views.setInt(R.id.change, "setBackgroundResource", downColor);
+                        }
+
+                        //We will always show percent change on the widget
+                        views.setTextViewText(R.id.change, currentData.getPercentChange());
 
                         // Create an Intent to launch MainActivity
                         Intent launchIntent = new Intent(mContext, MyStocksActivity.class);
