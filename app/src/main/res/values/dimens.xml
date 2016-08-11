@@ -6,6 +6,11 @@
 
     <dimen name="widget_margin">0dp</dimen>
 
+    <dimen name="widget_collection_min_height">110dp</dimen>
+    <dimen name="widget_collection_default_height">180dp</dimen>
+    <dimen name="widget_collection_min_width">250dp</dimen>
+    <dimen name="widget_collection_default_width">250dp</dimen>
+
 
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->

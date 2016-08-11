@@ -20,10 +20,13 @@
 
     <!-- Misc Strings-->
     <string name="title_activity_line_graph">Stock History</string>
+    <string name="title_single_stock_widget">Stock Widget</string>
+    <string name="title_stock_collection_widget">Stock Collection</string>
     <string name="fetching_data">Fetching data...</string>
     <string name="line_graph_x_axis_string">Stock Closing Values</string>
     <string name="config_activity_title">Choose the stock to track</string>
     <string name="stock_choice">Chosen stock : </string>
+    <string name="empty_stock_list">Empty list. Add stocks to view prices</string>
 
     <!--Content Descriptions-->
     <string name="line_chart_description">Shows the stock value over the last 10 days</string>

@@ -56,7 +56,7 @@
         <receiver
             android:name=".widget.StockWidgetProvider"
             android:icon="@mipmap/ic_launcher"
-            android:label="Stock Widget">
+            android:label="@string/title_single_stock_widget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -71,6 +71,18 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".widget.StockCollectionWidgetProvider"
+            android:label="@string/title_stock_collection_widget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.example.android.sunshine.app.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_collection_provider" />
+        </receiver>
+
     </application>
 
 </manifest>
