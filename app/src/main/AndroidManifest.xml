@@ -83,6 +83,12 @@
                 android:resource="@xml/widget_collection_provider" />
         </receiver>
 
+        <service
+            android:name=".service.StockCollectionProviderService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
     </application>
 
 </manifest>

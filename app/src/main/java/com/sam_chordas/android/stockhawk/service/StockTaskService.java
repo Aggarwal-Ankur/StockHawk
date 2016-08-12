@@ -242,7 +242,6 @@ public class StockTaskService extends GcmTaskService {
                         views.setTextViewText(R.id.bid_price, currentData.getPrice());
 
 
-                        int sdk = Build.VERSION.SDK_INT;
                         if (currentData.isUp()){
                             views.setInt(R.id.change, "setBackgroundResource", upColor);
                         } else{
