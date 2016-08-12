@@ -2,6 +2,7 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.widget.AdapterView;
@@ -11,6 +12,7 @@ import android.widget.RemoteViewsService;
 import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
+import com.sam_chordas.android.stockhawk.ui.LineGraphActivity;
 
 /**
  * Created by Ankur on 11-Aug-16.
@@ -102,6 +104,10 @@ public class StockCollectionProviderService extends RemoteViewsService {
 
                 //We will always show percent change on the widget
                 views.setTextViewText(R.id.change, percentChange);
+
+                final Intent fillInIntent = new Intent();
+                fillInIntent.putExtra(LineGraphActivity.SYMBOL_KEY, currentSymbol);
+                views.setOnClickFillInIntent(R.id.widget, fillInIntent);
                 
                 return views;
             }

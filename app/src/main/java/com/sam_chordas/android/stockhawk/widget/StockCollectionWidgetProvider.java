@@ -11,6 +11,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.widget.RemoteViews;
 
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockCollectionProviderService;
 import com.sam_chordas.android.stockhawk.ui.LineGraphActivity;
 import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
@@ -29,7 +30,7 @@ public class StockCollectionWidgetProvider extends AppWidgetProvider {
             //On click intent
             Intent intent = new Intent(context, MyStocksActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-            views.setOnClickPendingIntent(R.id.widget, pendingIntent);
+            views.setOnClickPendingIntent(R.id.collection_widget_container, pendingIntent);
             setRemoteAdapter(context, views);
 
             Intent clickIntent = new Intent(context, LineGraphActivity.class);
@@ -49,11 +50,12 @@ public class StockCollectionWidgetProvider extends AppWidgetProvider {
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
 
-        //TODO : check update or not
+        if(Utils.ACTION_DATA_UPDATED.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                     new ComponentName(context, getClass()));
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.list);
+        }
     }
 
 

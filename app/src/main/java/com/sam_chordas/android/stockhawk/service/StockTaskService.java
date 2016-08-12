@@ -10,8 +10,6 @@ import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -145,8 +143,13 @@ public class StockTaskService extends GcmTaskService {
                             Utils.quoteJsonToContentVals(getResponse));
 
                     if(isUpdate) {
-                        updateWidgets();
+                        updateSingleItemWidgets();
                     }
+
+                    //Notify the collection widgets to update
+                    Intent updateIntent = new Intent();
+                    updateIntent.setAction(Utils.ACTION_DATA_UPDATED);
+                    mContext.sendBroadcast(updateIntent);
                 } catch (RemoteException | OperationApplicationException e) {
                     Log.e(LOG_TAG, "Error applying batch insert", e);
                 }
@@ -162,7 +165,7 @@ public class StockTaskService extends GcmTaskService {
     }
 
 
-    private void updateWidgets(){
+    private void updateSingleItemWidgets(){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(mContext,
                 StockWidgetProvider.class));

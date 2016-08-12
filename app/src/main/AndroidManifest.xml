@@ -77,7 +77,7 @@
             android:label="@string/title_stock_collection_widget" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.android.sunshine.app.ACTION_DATA_UPDATED" />
+                <action android:name="com.sam_chordas.android.stockhawk.rest.ACTION_DATA_UPDATED" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/widget_collection_provider" />
